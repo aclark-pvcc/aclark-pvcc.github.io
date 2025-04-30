@@ -74,19 +74,30 @@ class Snake:
             self.direction = new_dir
 
     def move_snake(self, event_list):
+        input_processed = False  # Flag to track if input has been processed
+
         for e in event_list:
+            if input_processed:
+                # if there was an input on the current frame, don't process any more (avoids rapid inputs resulting in game over)
+                break
+
             if e.type == pygame.KEYDOWN:
                 # get the key input
                 if e.key == pygame.K_UP or e.key == pygame.K_w:
                     self.change_direction(Vector2(0, -1))
+                    # mark input as processed
+                    input_processed = True
                 elif e.key == pygame.K_DOWN or e.key == pygame.K_s:
                     self.change_direction(Vector2(0, 1))
+                    input_processed = True
                 elif e.key == pygame.K_LEFT or e.key == pygame.K_a:
                     self.change_direction(Vector2(-1, 0))
+                    input_processed = True
                 elif e.key == pygame.K_RIGHT or e.key == pygame.K_d:
                     self.change_direction(Vector2(1, 0))
-            
-            if e.type == pygame.JOYAXISMOTION:
+                    input_processed = True
+                
+            if e.type == pygame.JOYAXISMOTION and not input_processed:
                 # get the joystick axis values
                 x_axis = pygame.joystick.Joystick(0).get_axis(0)
                 y_axis = pygame.joystick.Joystick(0).get_axis(1)
@@ -94,24 +105,33 @@ class Snake:
                 # check for significant movement on the axes
                 if y_axis < -0.5:
                     self.change_direction(Vector2(0, -1))
+                    input_processed = True
                 elif y_axis > 0.5:
                     self.change_direction(Vector2(0, 1))
+                    input_processed = True
                 elif x_axis < -0.5:
                     self.change_direction(Vector2(-1, 0))
+                    input_processed = True
                 elif x_axis > 0.5:
                     self.change_direction(Vector2(1, 0))
+                    input_processed = True
 
 class Fruit:
-    # set up fruit
     def __init__(self):
         self.grow_fruit()
 
     def grow_fruit(self):
-        # random position, keep the fruit on the displayed area
-        self.x = random.randint(0, griddims - 1)
-        self.y = random.randint(0, griddims - 1)
-        self.pos = Vector2(self.x, self.y)
-    
+        while True:
+            # random position, keep the fruit on the displayed area
+            self.x = random.randint(0, griddims - 1)
+            self.y = random.randint(0, griddims - 1)
+            self.pos = Vector2(self.x, self.y)
+
+            # check if the new position is not on the snake's body
+            if self.pos not in snake.body:
+                # if it is not on the snake's body, exit the loop
+                break
+
     def draw_fruit(self):
         # size and position of the fruit
         fruitsq = pygame.Rect(int(self.pos.x * gridsize), int(self.pos.y * gridsize), gridsize, gridsize)
