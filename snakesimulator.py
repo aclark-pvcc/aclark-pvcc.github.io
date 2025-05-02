@@ -74,7 +74,8 @@ class Snake:
             self.direction = new_dir
 
     def move_snake(self, event_list):
-        input_processed = False  # Flag to track if input has been processed
+        # track whether input has been processed
+        input_processed = False
 
         for e in event_list:
             if input_processed:
